@@ -57,7 +57,7 @@ var BuildCommand = /** @class */ (function (_super) {
     BuildCommand.prototype.load = function (program) {
         var _this = this;
         program
-            .command('build [options]')
+            .command('build')
             .option('-c, --config [path]', 'build config')
             .description('build description')
             .action(function (command) { return __awaiter(_this, void 0, void 0, function () {

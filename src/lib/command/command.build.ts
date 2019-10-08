@@ -5,7 +5,7 @@ import { Input } from './command.input';
 export class BuildCommand extends AbstractCommand {
   public load(program: CommanderStatic) {
     program
-      .command('build [options]')
+      .command('build')
       .option('-c, --config [path]', 'build config')
       .description('build description')
       .action(async (command: Command) => {

@@ -70,7 +70,7 @@ var BuildAction = /** @class */ (function (_super) {
     }
     BuildAction.prototype.handle = function (param) {
         return __awaiter(this, void 0, void 0, function () {
-            var configPath, _configPath, config, doc;
+            var configPath, _configPath, config, doc, configs;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -91,6 +91,10 @@ var BuildAction = /** @class */ (function (_super) {
                         });
                         Context_1.default.generateModule(doc.definitions);
                         Context_1.default.generatePaths(doc.paths);
+                        configs = Context_1.default.getContext();
+                        return [4 /*yield*/, fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(configs, null, 2), { encoding: 'utf-8' })];
+                    case 2:
+                        _a.sent();
                         console.log(Context_1.default.getContext());
                         return [2 /*return*/];
                 }

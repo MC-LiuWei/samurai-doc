@@ -28,6 +28,8 @@ export class BuildAction extends AbstractAction {
     });
     Context.generateModule(doc.definitions);
     Context.generatePaths(doc.paths);
+    const configs = Context.getContext();
+    await fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(configs, null, 2), { encoding: 'utf-8' })
     console.log(Context.getContext());
   }
 }

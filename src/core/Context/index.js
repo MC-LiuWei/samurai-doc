@@ -10,7 +10,7 @@ var Context = /** @class */ (function () {
         var _this = this;
         if (required === void 0) { required = []; }
         var _schema = {};
-        if (!!schema) {
+        if (!schema) {
             return _schema;
         }
         var keys = Object.keys(schema);
@@ -37,7 +37,8 @@ var Context = /** @class */ (function () {
      * @param schema
      */
     Context.prototype.schemaType = function (schema) {
-        if (schema['title'] && schema['title']['allOf']) {
+        console.log(schema);
+        if (schema['title'] && schema['allOf']) {
             return 'object';
         }
         return schema['type'];
@@ -100,7 +101,7 @@ var Context = /** @class */ (function () {
         });
     };
     Context.prototype.parseResSchema = function (schema) {
-        if (!!schema['$ref']) {
+        if (!schema['$ref']) {
             return null;
         }
         return {
@@ -109,6 +110,7 @@ var Context = /** @class */ (function () {
         };
     };
     Context.prototype.parseParams = function (params) {
+        if (params === void 0) { params = []; }
         return params.map(function (param) {
             var temp = {
                 name: param['name'],

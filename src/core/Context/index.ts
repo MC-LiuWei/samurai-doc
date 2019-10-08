@@ -7,7 +7,7 @@ class Context {
 
   private parseModuleSchema(schema: any, required: [] = []): ModuleSchema {
     const _schema: ModuleSchema = {};
-    if (!!schema) {
+    if (!schema) {
       return _schema;
     }
     const keys = Object.keys(schema);
@@ -35,7 +35,8 @@ class Context {
    * @param schema 
    */
   private schemaType(schema: any) {
-    if (schema['title'] && schema['title']['allOf']) {
+    console.log(schema);
+    if (schema['title'] && schema['allOf']) {
       return 'object';
     }
     return schema['type']
@@ -101,7 +102,7 @@ class Context {
   }
 
   private parseResSchema(schema: any) {
-    if (!!schema['$ref']) {
+    if (!schema['$ref']) {
       return null;
     }
     return {
@@ -110,7 +111,7 @@ class Context {
     }
   }
 
-  private parseParams(params: any[]) {
+  private parseParams(params: any[] = []) {
     return params.map((param) => {
       const temp: Params = {
         name: param['name'],
