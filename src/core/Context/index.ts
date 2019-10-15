@@ -1,11 +1,11 @@
-import { Info, Paths, Modules, ModuleSchema, Params, Response } from './interface';
+import { Info, Paths, Modules, ModuleSchema, Params, Response, ContextObj } from './interface';
 
 class Context {
-  private info: Info = {};
-  private Paths: Array<Paths> = [];
-  private Modules: Array<Modules> = [];
+  private static info: Info = {};
+  private static Paths: Array<Paths> = [];
+  private static Modules: Array<Modules> = [];
 
-  private parseModuleSchema(schema: any, required: [] = []): ModuleSchema {
+  private parseModuleSchema(schema: any, required: any[] = []): ModuleSchema {
     const _schema: ModuleSchema = {};
     if (!schema) {
       return _schema;
@@ -35,7 +35,6 @@ class Context {
    * @param schema 
    */
   private schemaType(schema: any) {
-    console.log(schema);
     if (schema['title'] && schema['allOf']) {
       return 'object';
     }
@@ -73,7 +72,7 @@ class Context {
   private parsePath(paths: any, name: string) {
     const methods = Object.keys(paths);
     methods.forEach((method) => {
-      this.Paths.push({
+      Context.Paths.push({
         title: paths[method]['summary'],
         method,
         path: name,
@@ -101,6 +100,10 @@ class Context {
     })
   }
 
+  /**
+   * 拆分返回信息结构
+   * @param schema 
+   */
   private parseResSchema(schema: any) {
     if (!schema['$ref']) {
       return null;
@@ -111,16 +114,26 @@ class Context {
     }
   }
 
+  /**
+   * 拆分入参结构
+   * @param params 
+   */
   private parseParams(params: any[] = []) {
     return params.map((param) => {
       const temp: Params = {
         name: param['name'],
         type: param['schema'] ? param['name'] : param['type'],
         required: param['required'],
-        in: param['in'],
+        in: param['in']
       }
       if (param['schema']) {
         temp['ref'] = param['schema']['$ref'];
+      }
+      if (param['default']) {
+        temp['default'] = param['default'];
+      }
+      if (param['description']) {
+        temp['description'] = param['description'];
       }
       return temp;
     })
@@ -129,7 +142,7 @@ class Context {
   public generateModule(module: any) {
     const keys = Object.keys(module);
     keys.forEach((key) => {
-      this.Modules.push({
+      Context.Modules.push({
         type: module[key].type,
         name: key,
         schema: this.parseModuleSchema(module[key]['properties'], module[key]['required'])
@@ -145,15 +158,27 @@ class Context {
   }
 
   public generateInfo(info: Info) {
-    this.info = info;
+    Context.info = info;
   }
 
-  public getContext() {
+  public getContext(): ContextObj {
     return {
-      info: this.info,
-      modules: this.Modules,
-      paths: this.Paths
+      info: Context.info,
+      Modules: Context.Modules,
+      Paths: Context.Paths
     }
+  }
+
+  public getPaths() {
+    return Context.Paths;
+  }
+
+  public getModule(): Modules[] {
+    return Context.Modules;
+  }
+
+  public getInfo(): Info {
+    return Context.info;
   }
 }
 

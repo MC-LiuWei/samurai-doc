@@ -1,4 +1,7 @@
+import { Paths, Modules, Info } from '../Context/interface';
 export interface Task {
   callback: (message: any) => void;
-  name: string
+  message: Paths;
+  modules: Modules[];
+  info: Info;
 }

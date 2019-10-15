@@ -26,6 +26,7 @@ var cpus = os.cpus().length - 1;
 var Boss = /** @class */ (function () {
     function Boss() {
         this.taskWorkers = [];
+        this.createWorks();
     }
     Boss.prototype.createWorks = function () {
         if (Boss.isInit) {
@@ -42,7 +43,7 @@ var Boss = /** @class */ (function () {
         this.createWorks();
         var worker = Boss.works.pop();
         var callback = task.callback, params = __rest(task, ["callback"]);
-        worker.send(task);
+        worker.send(params);
         worker.once('message', function (messsage) {
             var msg = JSON.parse(messsage);
             callback(msg);
@@ -82,3 +83,4 @@ var Boss = /** @class */ (function () {
     Boss.isInit = false;
     return Boss;
 }());
+exports.default = new Boss();

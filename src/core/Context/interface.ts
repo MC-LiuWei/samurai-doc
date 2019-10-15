@@ -29,6 +29,8 @@ export interface Params {
   required: boolean;
   in: string;
   ref?: string;
+  default?: any;
+  description?: string;
 }
 
 export interface Response {
@@ -40,4 +42,10 @@ export interface Response {
 interface Schema {
   type: string;
   ref?: string;
+}
+
+export interface ContextObj {
+  info: Info,
+  Paths: Paths[],
+  Modules: Modules[]
 }

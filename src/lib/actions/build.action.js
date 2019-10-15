@@ -63,6 +63,8 @@ var fs = __importStar(require("fs"));
 var axios_1 = __importDefault(require("axios"));
 var abstract_action_1 = require("./abstract.action");
 var Context_1 = __importDefault(require("../../core/Context"));
+var getFilenameSuffix_1 = require("../../utils/getFilenameSuffix");
+var generateDoc_1 = require("../../core/generateDoc");
 var BuildAction = /** @class */ (function (_super) {
     __extends(BuildAction, _super);
     function BuildAction() {
@@ -70,16 +72,17 @@ var BuildAction = /** @class */ (function (_super) {
     }
     BuildAction.prototype.handle = function (param) {
         return __awaiter(this, void 0, void 0, function () {
-            var configPath, _configPath, config, doc, configs;
+            var configPath, strConfigPath, _configPath, config, doc, configs;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        configPath = param.find(function (item) { return item.name === 'config'; });
-                        if (!configPath) {
+                        configPath = param.find(function (item) { return item.name === 'config'; }).value;
+                        strConfigPath = String(configPath);
+                        if (!configPath || !getFilenameSuffix_1.getFilenameSuffix(strConfigPath)) {
                             console.log();
                             process.exit(1);
                         }
-                        _configPath = path.join(process.cwd(), configPath.value);
+                        _configPath = path.join(process.cwd(), strConfigPath);
                         config = JSON.parse(fs.readFileSync(_configPath, { encoding: 'utf-8' }));
                         return [4 /*yield*/, getDoc(config.url)];
                     case 1:
@@ -92,10 +95,11 @@ var BuildAction = /** @class */ (function (_super) {
                         Context_1.default.generateModule(doc.definitions);
                         Context_1.default.generatePaths(doc.paths);
                         configs = Context_1.default.getContext();
-                        return [4 /*yield*/, fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(configs, null, 2), { encoding: 'utf-8' })];
+                        //await fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(configs, null, 2), { encoding: 'utf-8' })
+                        return [4 /*yield*/, generateDoc_1.generateDoc(Context_1.default.getContext())];
                     case 2:
+                        //await fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(configs, null, 2), { encoding: 'utf-8' })
                         _a.sent();
-                        console.log(Context_1.default.getContext());
                         return [2 /*return*/];
                 }
             });

@@ -4,7 +4,8 @@ import axios from 'axios';
 import { AbstractAction } from "./abstract.action";
 import { Input } from "../command/command.input";
 import Context from '../../core/Context';
-import { version } from 'punycode';
+import { getFilenameSuffix } from '../../utils/getFilenameSuffix';
+import { generateDoc } from '../../core/generateDoc';
 
 export interface ConfigInterface {
   url: string;
@@ -13,12 +14,14 @@ export interface ConfigInterface {
 
 export class BuildAction extends AbstractAction {
   public async handle(param: Input[]) {
-    const configPath = param.find((item) => item.name === 'config');
-    if (!configPath) {
+    const configPath = param.find((item) => item.name === 'config')!.value;
+    const strConfigPath = String(configPath);
+    if (!configPath || !getFilenameSuffix(strConfigPath)) {
       console.log();
       process.exit(1);
     }
-    const _configPath = path.join(process.cwd(), configPath.value);
+
+    const _configPath = path.join(process.cwd(), strConfigPath);
     const config: ConfigInterface = JSON.parse(fs.readFileSync(_configPath, { encoding: 'utf-8' }));
     const doc = await getDoc(config.url);
     Context.generateInfo({
@@ -29,8 +32,8 @@ export class BuildAction extends AbstractAction {
     Context.generateModule(doc.definitions);
     Context.generatePaths(doc.paths);
     const configs = Context.getContext();
-    await fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(configs, null, 2), { encoding: 'utf-8' })
-    console.log(Context.getContext());
+    //await fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(configs, null, 2), { encoding: 'utf-8' })
+    await generateDoc(Context.getContext());
   }
 }
 

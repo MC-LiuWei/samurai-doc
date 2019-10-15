@@ -2,9 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var Context = /** @class */ (function () {
     function Context() {
-        this.info = {};
-        this.Paths = [];
-        this.Modules = [];
     }
     Context.prototype.parseModuleSchema = function (schema, required) {
         var _this = this;
@@ -37,7 +34,6 @@ var Context = /** @class */ (function () {
      * @param schema
      */
     Context.prototype.schemaType = function (schema) {
-        console.log(schema);
         if (schema['title'] && schema['allOf']) {
             return 'object';
         }
@@ -73,7 +69,7 @@ var Context = /** @class */ (function () {
         var _this = this;
         var methods = Object.keys(paths);
         methods.forEach(function (method) {
-            _this.Paths.push({
+            Context.Paths.push({
                 title: paths[method]['summary'],
                 method: method,
                 path: name,
@@ -100,6 +96,10 @@ var Context = /** @class */ (function () {
             return _res;
         });
     };
+    /**
+     * 拆分返回信息结构
+     * @param schema
+     */
     Context.prototype.parseResSchema = function (schema) {
         if (!schema['$ref']) {
             return null;
@@ -109,6 +109,10 @@ var Context = /** @class */ (function () {
             ref: schema['$ref']
         };
     };
+    /**
+     * 拆分入参结构
+     * @param params
+     */
     Context.prototype.parseParams = function (params) {
         if (params === void 0) { params = []; }
         return params.map(function (param) {
@@ -116,10 +120,16 @@ var Context = /** @class */ (function () {
                 name: param['name'],
                 type: param['schema'] ? param['name'] : param['type'],
                 required: param['required'],
-                in: param['in'],
+                in: param['in']
             };
             if (param['schema']) {
                 temp['ref'] = param['schema']['$ref'];
+            }
+            if (param['default']) {
+                temp['default'] = param['default'];
+            }
+            if (param['description']) {
+                temp['description'] = param['description'];
             }
             return temp;
         });
@@ -128,7 +138,7 @@ var Context = /** @class */ (function () {
         var _this = this;
         var keys = Object.keys(module);
         keys.forEach(function (key) {
-            _this.Modules.push({
+            Context.Modules.push({
                 type: module[key].type,
                 name: key,
                 schema: _this.parseModuleSchema(module[key]['properties'], module[key]['required'])
@@ -143,15 +153,27 @@ var Context = /** @class */ (function () {
         });
     };
     Context.prototype.generateInfo = function (info) {
-        this.info = info;
+        Context.info = info;
     };
     Context.prototype.getContext = function () {
         return {
-            info: this.info,
-            modules: this.Modules,
-            paths: this.Paths
+            info: Context.info,
+            Modules: Context.Modules,
+            Paths: Context.Paths
         };
     };
+    Context.prototype.getPaths = function () {
+        return Context.Paths;
+    };
+    Context.prototype.getModule = function () {
+        return Context.Modules;
+    };
+    Context.prototype.getInfo = function () {
+        return Context.info;
+    };
+    Context.info = {};
+    Context.Paths = [];
+    Context.Modules = [];
     return Context;
 }());
 exports.default = new Context();

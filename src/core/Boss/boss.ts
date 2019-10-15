@@ -8,6 +8,10 @@ const cpus = os.cpus().length - 1;
 
 
 class Boss {
+  constructor() {
+    this.createWorks();
+  }
+
   /** BOSS中的工作线程，多实例共享 **/
   private static works: Array<ChildProcess> = [];
   private static isInit: boolean = false;
@@ -27,7 +31,7 @@ class Boss {
     this.createWorks();
     const worker: ChildProcess | any = Boss.works.pop();
     const { callback, ...params } = task;
-    worker.send(task);
+    worker.send(params);
     worker.once('message', (messsage: string) => {
       const msg = JSON.parse(messsage);
       callback(msg);
@@ -66,3 +70,5 @@ class Boss {
     Boss.isInit = false;
   }
 }
+
+export default new Boss();
