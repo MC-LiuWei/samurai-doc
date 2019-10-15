@@ -45,8 +45,7 @@ var Boss = /** @class */ (function () {
         var callback = task.callback, params = __rest(task, ["callback"]);
         worker.send(params);
         worker.once('message', function (messsage) {
-            var msg = JSON.parse(messsage);
-            callback(msg);
+            callback(messsage);
             Boss.works.push(worker);
             if (_this.taskWorkers.length > 0) {
                 _this.init(_this.taskWorkers.pop());

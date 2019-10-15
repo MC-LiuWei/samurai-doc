@@ -73,7 +73,7 @@ var Context = /** @class */ (function () {
                 title: paths[method]['summary'],
                 method: method,
                 path: name,
-                tags: paths[method]['tags'] ? paths[method]['tags'][0] : null,
+                tags: paths[method]['tags'] ? paths[method]['tags'][0] : 'default',
                 params: _this.parseParams(paths[method]['parameters']),
                 responses: _this.parseRes(paths[method]['responses'])
             });
@@ -128,7 +128,7 @@ var Context = /** @class */ (function () {
             if (param['default']) {
                 temp['default'] = param['default'];
             }
-            if (param['description']) {
+            if (!!param['description']) {
                 temp['description'] = param['description'];
             }
             return temp;

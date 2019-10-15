@@ -12,15 +12,10 @@ export async function generateDoc(context: ContextObj) {
         info: Context.getInfo(),
         modules: Context.getModule(),
         callback: (message: any) => {
-          res();
+          res(message);
         }
       });
     }))
   });
   return Promise.all(tasks)
-    .then((res) => {
-      //console.log(res);
-    }, (rej) => {
-      //console.log(rej);
-    })
 }

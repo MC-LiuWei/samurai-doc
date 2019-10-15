@@ -33,8 +33,7 @@ class Boss {
     const { callback, ...params } = task;
     worker.send(params);
     worker.once('message', (messsage: string) => {
-      const msg = JSON.parse(messsage);
-      callback(msg);
+      callback(messsage);
       Boss.works.push(worker);
       if (this.taskWorkers.length > 0) {
         this.init(this.taskWorkers.pop());

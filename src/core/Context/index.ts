@@ -76,7 +76,7 @@ class Context {
         title: paths[method]['summary'],
         method,
         path: name,
-        tags: paths[method]['tags'] ? paths[method]['tags'][0] : null,
+        tags: paths[method]['tags'] ? paths[method]['tags'][0] : 'default',
         params: this.parseParams(paths[method]['parameters']),
         responses: this.parseRes(paths[method]['responses'])
       });
@@ -132,7 +132,7 @@ class Context {
       if (param['default']) {
         temp['default'] = param['default'];
       }
-      if (param['description']) {
+      if (!!param['description']) {
         temp['description'] = param['description'];
       }
       return temp;

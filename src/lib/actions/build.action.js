@@ -72,7 +72,7 @@ var BuildAction = /** @class */ (function (_super) {
     }
     BuildAction.prototype.handle = function (param) {
         return __awaiter(this, void 0, void 0, function () {
-            var configPath, strConfigPath, _configPath, config, doc, configs;
+            var configPath, strConfigPath, _configPath, config, doc, configs, docContext;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -95,11 +95,12 @@ var BuildAction = /** @class */ (function (_super) {
                         Context_1.default.generateModule(doc.definitions);
                         Context_1.default.generatePaths(doc.paths);
                         configs = Context_1.default.getContext();
-                        //await fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(configs, null, 2), { encoding: 'utf-8' })
+                        fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(Context_1.default.getModule(), null, 2), { encoding: 'utf-8' });
                         return [4 /*yield*/, generateDoc_1.generateDoc(Context_1.default.getContext())];
                     case 2:
-                        //await fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(configs, null, 2), { encoding: 'utf-8' })
-                        _a.sent();
+                        docContext = _a.sent();
+                        fs.writeFileSync(path.join(process.cwd(), 'test.js'), docContext.join(''), { encoding: 'utf8' });
+                        process.exit(0);
                         return [2 /*return*/];
                 }
             });

@@ -53,17 +53,12 @@ function generateDoc(context) {
                         info: Context_1.default.getInfo(),
                         modules: Context_1.default.getModule(),
                         callback: function (message) {
-                            res();
+                            res(message);
                         }
                     });
                 }));
             });
-            return [2 /*return*/, Promise.all(tasks)
-                    .then(function (res) {
-                    //console.log(res);
-                }, function (rej) {
-                    //console.log(rej);
-                })];
+            return [2 /*return*/, Promise.all(tasks)];
         });
     });
 }
