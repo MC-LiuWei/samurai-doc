@@ -95,7 +95,7 @@ var BuildAction = /** @class */ (function (_super) {
                         Context_1.default.generateModule(doc.definitions);
                         Context_1.default.generatePaths(doc.paths);
                         configs = Context_1.default.getContext();
-                        fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(Context_1.default.getModule(), null, 2), { encoding: 'utf-8' });
+                        fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(doc, null, 2), { encoding: 'utf-8' });
                         return [4 /*yield*/, generateDoc_1.generateDoc(Context_1.default.getContext())];
                     case 2:
                         docContext = _a.sent();

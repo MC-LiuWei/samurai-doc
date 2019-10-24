@@ -32,8 +32,7 @@ export class BuildAction extends AbstractAction {
     Context.generateModule(doc.definitions);
     Context.generatePaths(doc.paths);
     const configs = Context.getContext();
-    fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(Context.getModule(), null, 2), { encoding: 'utf-8' });
-    //await fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(configs, null, 2), { encoding: 'utf-8' })
+    fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(doc, null, 2), { encoding: 'utf-8' });
     const docContext = await generateDoc(Context.getContext());
     fs.writeFileSync(path.join(process.cwd(), 'test.js'), docContext.join(''), { encoding: 'utf8' });
     process.exit(0);

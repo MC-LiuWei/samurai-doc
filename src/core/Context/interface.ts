@@ -17,6 +17,7 @@ export interface Modules {
   type: string;
   name: string;
   schema?: ModuleSchema;
+  description?: string;
 }
 
 export interface ModuleSchema {

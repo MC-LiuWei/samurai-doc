@@ -4,7 +4,7 @@ import { Params, Modules } from '../Context/interface';
 interface DocData {
   type: string;
   name: string;
-  info: string
+  info?: string;
 }
 
 function generateApiName(path: string, method: string) {
@@ -26,13 +26,16 @@ function getParams(params: Array<Params>, type: string) {
     .filter((item) => !!item);
 }
 
+function renderString(indent: string, type: string, data: DocData) {
+  return `${indent} * @${type} {${data.type}} ${data.name} ${data.info || ''} \n`
+}
+
 function generateApiHeader(params: Array<Params>, indent: number, modules: Array<Modules>) {
   const indentStr = ' '.repeat(indent);
   const type = 'apiHeader';
   return getParams(params, 'header')
     .map((item: any) => {
-      return `* @apiHeader {${item.type}} ${item.name} ${item.description || ''}
-      `;
+      return renderString(indentStr, '@ApiHeader', { name: item.name, type: item.type, info: item.description })
     })
     .join('');
 }
@@ -45,13 +48,19 @@ function generateApiQuery(params: Array<Params>) {
   return getParams(params, 'query');
 }
 
-function renderString(indent: string, type: string, data: DocData) {
-  return `${indent} * @${type} {${data.type}} ${data.name} ${data.info} \n`
-}
-
-function modulesTodoc(type: string, parentName: string, ref: string, modules: Array<Modules>) {
+function modulesTodoc(ref: string, modules: Array<Modules>, note: string, parentName: string, indent: number) {
+  const indentStr = ' '.repeat(indent);
   const name = ref.split('/').pop();
   const _module = modules.find((item) => item.name === name);
+  if (!_module) {
+    return;
+  }
+  if (!_module.schema) {
+    return renderString(indentStr, _module.type, { type: note, name: _module.name, info: _module.description })
+  }
+
+  const key = Object.keys(_module.schema);
+  return _module.schema
 }
 
 export function parseDocObject(task: Task): string {
