@@ -49,6 +49,6 @@ function modulesTodoc(ref, modules, note, parentName, indent) {
     return _module.schema;
 }
 function parseDocObject(task) {
-    return "\n  /** \n   * @api {" + task.message.method + "} " + task.message.path + " " + task.message.title + "\n   * @apiName " + generateApiName(task.message.path.replace(/\s+/g, ""), task.message.method) + "\n   * @apiGroup " + task.message.tags + "\n   * @ApiVersion " + task.info.version + "\n   * @apiDescription " + task.message.title + "\n   */\n  ";
+    return "\n  /** \n   * @api {" + task.message.method + "} " + task.message.path + " " + task.message.title + "\n   * @apiName " + generateApiName(task.message.path.replace(/\s+/g, ""), task.message.method) + "\n   * @apiGroup " + task.message.tags + "\n   * @ApiVersion " + task.info.version + ".1\n   * @apiDescription " + task.message.title + "\n   * @apiParam (header) {String} code \u9519\u8BEF\u7801\n   * @apiParam (param) {String} code \u9519\u8BEF\u7801\n   * @apiParam (query) {String} query \u53C2\u6570\n   */\n  ";
 }
 exports.parseDocObject = parseDocObject;

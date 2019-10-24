@@ -60,11 +60,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var path = __importStar(require("path"));
 var fs = __importStar(require("fs"));
+var io_spin_1 = __importDefault(require("io-spin"));
+var chalk_1 = __importDefault(require("chalk"));
+var child_process_1 = require("child_process");
 var axios_1 = __importDefault(require("axios"));
 var abstract_action_1 = require("./abstract.action");
 var Context_1 = __importDefault(require("../../core/Context"));
 var getFilenameSuffix_1 = require("../../utils/getFilenameSuffix");
 var generateDoc_1 = require("../../core/generateDoc");
+var spinner = io_spin_1.default('  >>>>>>  加载中', "Box1");
 var BuildAction = /** @class */ (function (_super) {
     __extends(BuildAction, _super);
     function BuildAction() {
@@ -72,35 +76,22 @@ var BuildAction = /** @class */ (function (_super) {
     }
     BuildAction.prototype.handle = function (param) {
         return __awaiter(this, void 0, void 0, function () {
-            var configPath, strConfigPath, _configPath, config, doc, configs, docContext;
+            var configPath, strConfigPath, _configPath, config;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         configPath = param.find(function (item) { return item.name === 'config'; }).value;
                         strConfigPath = String(configPath);
                         if (!configPath || !getFilenameSuffix_1.getFilenameSuffix(strConfigPath)) {
-                            console.log();
                             process.exit(1);
                         }
                         _configPath = path.join(process.cwd(), strConfigPath);
                         config = JSON.parse(fs.readFileSync(_configPath, { encoding: 'utf-8' }));
-                        return [4 /*yield*/, getDoc(config.url)];
+                        spinner.update(chalk_1.default.cyanBright('  >>>>  文档加载中'));
+                        spinner.start();
+                        return [4 /*yield*/, Generate(config)];
                     case 1:
-                        doc = _a.sent();
-                        Context_1.default.generateInfo({
-                            description: doc.info.description,
-                            version: doc.info.version,
-                            title: doc.info.title
-                        });
-                        Context_1.default.generateModule(doc.definitions);
-                        Context_1.default.generatePaths(doc.paths);
-                        configs = Context_1.default.getContext();
-                        fs.writeFileSync(path.join(process.cwd(), 'test.json'), JSON.stringify(doc, null, 2), { encoding: 'utf-8' });
-                        return [4 /*yield*/, generateDoc_1.generateDoc(Context_1.default.getContext())];
-                    case 2:
-                        docContext = _a.sent();
-                        fs.writeFileSync(path.join(process.cwd(), 'test.js'), docContext.join(''), { encoding: 'utf8' });
-                        process.exit(0);
+                        _a.sent();
                         return [2 /*return*/];
                 }
             });
@@ -109,6 +100,97 @@ var BuildAction = /** @class */ (function (_super) {
     return BuildAction;
 }(abstract_action_1.AbstractAction));
 exports.BuildAction = BuildAction;
+function Generate(config) {
+    return __awaiter(this, void 0, void 0, function () {
+        var docConfigs, outputPath, apiDocPath, docTaskQueue;
+        var _this = this;
+        return __generator(this, function (_a) {
+            docConfigs = config.configs;
+            outputPath = path.join(process.cwd(), config.output);
+            apiDocPath = path.join(process.cwd(), 'apidoc');
+            docTaskQueue = [];
+            if (!fs.existsSync(outputPath)) {
+                fs.mkdirSync(outputPath);
+            }
+            if (!fs.existsSync(apiDocPath)) {
+                fs.mkdirSync(apiDocPath);
+            }
+            docTaskQueue = docConfigs.map(function (item) {
+                return new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
+                    var doc;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, getDoc(item.url)];
+                            case 1:
+                                doc = _a.sent();
+                                fs.writeFileSync(path.join(process.cwd(), item.name + ".json"), JSON.stringify(doc, null, 2), { encoding: 'utf8' });
+                                res({
+                                    name: item.name,
+                                    doc: doc,
+                                });
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+            });
+            Promise.all(docTaskQueue)
+                .then(function (res) {
+                res.forEach(function (_doc, index) { return __awaiter(_this, void 0, void 0, function () {
+                    var doc, name, docOutputPath, docApiDocPath, docContent, docCode, docBiscConfig;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                doc = _doc.doc, name = _doc.name;
+                                docOutputPath = path.join(outputPath, name);
+                                docApiDocPath = path.join(apiDocPath, name);
+                                if (!fs.existsSync(path.join(docOutputPath))) {
+                                    fs.mkdirSync(docOutputPath);
+                                }
+                                if (!fs.existsSync(path.join(docApiDocPath))) {
+                                    fs.mkdirSync(docApiDocPath);
+                                }
+                                Context_1.default.generateInfo({
+                                    description: doc.info.description,
+                                    version: doc.info.version,
+                                    title: doc.info.title
+                                });
+                                Context_1.default.generateModule(doc.definitions);
+                                Context_1.default.generatePaths(doc.paths);
+                                docContent = Context_1.default.getContext();
+                                fs.writeFileSync(path.join(process.cwd(), name + ".json"), JSON.stringify(docContent, null, 2), { encoding: 'utf8' });
+                                return [4 /*yield*/, generateDoc_1.generateDoc(docContent)];
+                            case 1:
+                                docCode = _a.sent();
+                                fs.writeFileSync(path.join(docOutputPath, 'apidoc.js'), docCode.join(''), { encoding: 'utf8' });
+                                child_process_1.execSync("apidoc -i ./dist/" + name + " -o apidoc/" + name);
+                                docBiscConfig = config.configs.find(function (item) { return item.name === name; });
+                                fs.writeFileSync(path.join(docApiDocPath, 'apidoc.json'), JSON.stringify({
+                                    name: name,
+                                    version: doc.info.version + ".1" || docBiscConfig.version,
+                                    description: docBiscConfig.description || name,
+                                    title: docBiscConfig.title || name,
+                                    url: "http://www.apidoc-admin.com/",
+                                }, null, 2), { encoding: 'utf8' });
+                                if (index === 0) {
+                                    spinner.stop();
+                                    process.exit(0);
+                                }
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+            });
+            return [2 /*return*/];
+        });
+    });
+}
+function docToApiDoc(config) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/];
+        });
+    });
+}
 function getDoc(url) {
     return __awaiter(this, void 0, void 0, function () {
         var res, json, config;
@@ -119,12 +201,12 @@ function getDoc(url) {
                     res = _a.sent();
                     json = res.data.match(/var options = ({\s+"swaggerDoc"[\s\S]+});\s+url = options.swaggerUrl/m);
                     if (!json || !json[1]) {
-                        console.log();
+                        console.log('文档解析失败');
                         process.exit(1);
                     }
                     config = JSON.parse(json[1]);
                     if (!config) {
-                        console.log();
+                        console.info('文档读取失败');
                         process.exit(1);
                     }
                     return [2 /*return*/, config.swaggerDoc];

@@ -69,8 +69,11 @@ export function parseDocObject(task: Task): string {
    * @api {${task.message.method}} ${task.message.path} ${task.message.title}
    * @apiName ${generateApiName(task.message.path.replace(/\s+/g, ""), task.message.method)}
    * @apiGroup ${task.message.tags}
-   * @ApiVersion ${task.info.version}
+   * @ApiVersion ${task.info.version}.1
    * @apiDescription ${task.message.title}
+   * @apiParam (header) {String} code 错误码
+   * @apiParam (param) {String} code 错误码
+   * @apiParam (query) {String} query 参数
    */
   `;
 }
