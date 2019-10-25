@@ -9,6 +9,7 @@ import { Input } from "../command/command.input";
 import Context from '../../core/Context';
 import { getFilenameSuffix } from '../../utils/getFilenameSuffix';
 import { generateDoc } from '../../core/generateDoc';
+import Content from '../../core/Content';
 const spinner = spin('  >>>>>>  加载中', "Box1");
 export interface ConfigInterface {
   name: string;
@@ -55,6 +56,9 @@ async function Generate(config: Configs) {
   docTaskQueue = docConfigs.map<Promise<{ name: string; doc: any }>>((item) => {
     return new Promise<{ name: string; doc: any }>(async (res, rej) => {
       const doc = await getDoc(item.url);
+      console.log(doc)
+      // const content = new Content(doc);
+
       fs.writeFileSync(path.join(process.cwd(), `${item.name}.json`), JSON.stringify(doc, null, 2), { encoding: 'utf8' });
       res({
         name: item.name,
@@ -63,45 +67,45 @@ async function Generate(config: Configs) {
     })
   });
 
-  Promise.all<{ name: string; doc: any }>(docTaskQueue)
-    .then((res) => {
-      res.forEach(async (_doc, index) => {
-        const { doc, name } = _doc
-        const docOutputPath = path.join(outputPath, name);
-        const docApiDocPath = path.join(apiDocPath, name);
-        if (!fs.existsSync(path.join(docOutputPath))) {
-          fs.mkdirSync(docOutputPath);
-        }
-        if (!fs.existsSync(path.join(docApiDocPath))) {
-          fs.mkdirSync(docApiDocPath);
-        }
-        Context.generateInfo({
-          description: doc.info.description,
-          version: doc.info.version,
-          title: doc.info.title
-        });
-        Context.generateModule(doc.definitions);
-        Context.generatePaths(doc.paths);
-        const docContent = Context.getContext();
-        fs.writeFileSync(path.join(process.cwd(), `${name}.json`), JSON.stringify(docContent, null, 2), { encoding: 'utf8' });
-        const docCode = await generateDoc(docContent);
-        fs.writeFileSync(path.join(docOutputPath, 'apidoc.js'), docCode.join(''), { encoding: 'utf8' });
-        execSync(`apidoc -i ./dist/${name} -o apidoc/${name}`);
+  // Promise.all<{ name: string; doc: any }>(docTaskQueue)
+  //   .then((res) => {
+  //     res.forEach(async (_doc, index) => {
+  //       const { doc, name } = _doc
+  //       const docOutputPath = path.join(outputPath, name);
+  //       const docApiDocPath = path.join(apiDocPath, name);
+  //       if (!fs.existsSync(path.join(docOutputPath))) {
+  //         fs.mkdirSync(docOutputPath);
+  //       }
+  //       if (!fs.existsSync(path.join(docApiDocPath))) {
+  //         fs.mkdirSync(docApiDocPath);
+  //       }
+  //       Context.generateInfo({
+  //         description: doc.info.description,
+  //         version: doc.info.version,
+  //         title: doc.info.title
+  //       });
+  //       Context.generateModule(doc.definitions);
+  //       Context.generatePaths(doc.paths);
+  //       const docContent = Context.getContext();
+  //       fs.writeFileSync(path.join(process.cwd(), `${name}.json`), JSON.stringify(docContent, null, 2), { encoding: 'utf8' });
+  //       const docCode = await generateDoc(docContent);
+  //       fs.writeFileSync(path.join(docOutputPath, 'apidoc.js'), docCode.join(''), { encoding: 'utf8' });
+  //       execSync(`apidoc -i ./dist/${name} -o apidoc/${name}`);
 
-        const docBiscConfig: any = config.configs.find((item) => item.name === name);
-        fs.writeFileSync(path.join(docApiDocPath, 'apidoc.json'), JSON.stringify({
-          name,
-          version: `${doc.info.version}.1` || docBiscConfig.version,
-          description: docBiscConfig.description || name,
-          title: docBiscConfig.title || name,
-          url: "http://www.apidoc-admin.com/",
-        }, null, 2), { encoding: 'utf8' });
-        if (index === 0) {
-          spinner.stop();
-          process.exit(0);
-        }
-      });
-    });
+  //       const docBiscConfig: any = config.configs.find((item) => item.name === name);
+  //       fs.writeFileSync(path.join(docApiDocPath, 'apidoc.json'), JSON.stringify({
+  //         name,
+  //         version: `${doc.info.version}.1` || docBiscConfig.version,
+  //         description: docBiscConfig.description || name,
+  //         title: docBiscConfig.title || name,
+  //         url: "http://www.apidoc-admin.com/",
+  //       }, null, 2), { encoding: 'utf8' });
+  //       if (index === 0) {
+  //         spinner.stop();
+  //         process.exit(0);
+  //       }
+  //     });
+  //   });
 }
 
 async function docToApiDoc(config: Configs) {
