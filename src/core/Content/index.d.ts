@@ -1,7 +1,9 @@
-import { Swagger } from "./swagger";
+import { Swagger, Schemas } from "./swagger";
+import { Paths } from "./paths";
 export default class Content {
     private readonly doc;
     constructor(doc: Swagger);
-    getPath(): import("./swagger").Param[][];
+    getPath(): Paths[];
+    getModule(): Schemas[];
 }
 //# sourceMappingURL=index.d.ts.map

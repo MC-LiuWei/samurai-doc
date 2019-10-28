@@ -62,9 +62,12 @@ var path = __importStar(require("path"));
 var fs = __importStar(require("fs"));
 var io_spin_1 = __importDefault(require("io-spin"));
 var chalk_1 = __importDefault(require("chalk"));
+var child_process_1 = require("child_process");
 var axios_1 = __importDefault(require("axios"));
 var abstract_action_1 = require("./abstract.action");
+var Content_1 = __importDefault(require("../../core/Content"));
 var getFilenameSuffix_1 = require("../../utils/getFilenameSuffix");
+var document_1 = require("../../core/document");
 var spinner = io_spin_1.default('  >>>>>>  加载中', "Box1");
 var BuildAction = /** @class */ (function (_super) {
     __extends(BuildAction, _super);
@@ -120,13 +123,52 @@ function Generate(config) {
                             case 0: return [4 /*yield*/, getDoc(item.url)];
                             case 1:
                                 doc = _a.sent();
-                                console.log(doc);
-                                // const content = new Content(doc);
                                 fs.writeFileSync(path.join(process.cwd(), item.name + ".json"), JSON.stringify(doc, null, 2), { encoding: 'utf8' });
                                 res({
                                     name: item.name,
                                     doc: doc,
                                 });
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+            });
+            Promise.all(docTaskQueue)
+                .then(function (res) {
+                res.forEach(function (_doc, index) { return __awaiter(_this, void 0, void 0, function () {
+                    var doc, name, docOutputPath, docApiDocPath, paths, modules, docCode, docBiscConfig;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                doc = _doc.doc, name = _doc.name;
+                                docOutputPath = path.join(outputPath, name);
+                                docApiDocPath = path.join(apiDocPath, name);
+                                if (!fs.existsSync(path.join(docOutputPath))) {
+                                    fs.mkdirSync(docOutputPath);
+                                }
+                                if (!fs.existsSync(path.join(docApiDocPath))) {
+                                    fs.mkdirSync(docApiDocPath);
+                                }
+                                paths = new Content_1.default(doc);
+                                modules = paths.getModule();
+                                fs.writeFileSync(path.join(process.cwd(), name + ".json"), JSON.stringify({ modules: modules }, null, 2), { encoding: 'utf8' });
+                                return [4 /*yield*/, document_1.generateDoc(paths.getPath(), modules)];
+                            case 1:
+                                docCode = _a.sent();
+                                fs.writeFileSync(path.join(docOutputPath, 'apidoc.js'), docCode.join(''), { encoding: 'utf8' });
+                                child_process_1.execSync("apidoc -i ./dist/" + name + " -o apidoc/" + name);
+                                docBiscConfig = config.configs.find(function (item) { return item.name === name; });
+                                fs.writeFileSync(path.join(docApiDocPath, 'apidoc.json'), JSON.stringify({
+                                    name: name,
+                                    version: doc.info.version + ".1" || docBiscConfig.version,
+                                    description: docBiscConfig.description || name,
+                                    title: docBiscConfig.title || name,
+                                    url: "http://www.apidoc-admin.com/",
+                                }, null, 2), { encoding: 'utf8' });
+                                if (index === 0) {
+                                    spinner.stop();
+                                    process.exit(0);
+                                }
                                 return [2 /*return*/];
                         }
                     });
@@ -161,6 +203,7 @@ function getDoc(url) {
                         console.info('文档读取失败');
                         process.exit(1);
                     }
+                    fs.writeFileSync(path.join(process.cwd(), "test.json"), JSON.stringify(config.swaggerDoc, null, 2), { encoding: 'utf8' });
                     return [2 /*return*/, config.swaggerDoc];
             }
         });

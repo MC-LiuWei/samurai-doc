@@ -3,41 +3,46 @@ export interface Swagger {
   basePath: string;
   tags: string[];
   schemes: string[];
-  paths: { [key: string]: Path };
-  definitions: Definition;
+  paths: SwaggerPaths;
+  definitions: SwaggerDefinition;
 }
 
-export interface Definition {
-  [key: string]: {
-    type: string;
-    properties: Propertie;
-    required: string[];
-  }
+export interface SwaggerPaths {
+  [key: string]: SwaggerPath
 }
 
-export interface Propertie {
-  [key: string]: {
-    type?: string;
-    description?: string;
-    title?: string;
-    items?: { [key: string]: string };
-    allOf?: { [key: string]: string }[];
-  }
+export interface SwaggerPathMethod {
+  summary: string;
+  parameters: SwaggerParameters[];
+  responses: Response;
+  tags: string[];
 }
 
-export interface Module {
+
+export interface SwaggerDefinition {
+  [key: string]: SwaggerModule
+}
+
+export interface SwaggerModule {
   type: string;
-  name: string;
-  schema: { [key: string]: Schema }
+  properties: SwaggerPropertie;
+  required: string[];
 }
 
-export interface Path {
-  [key: string]: {
-    summary: string;
-    parameters: Parameters[];
-    responses: Response;
-    tags: string[];
-  }
+export interface SwaggerPropertie {
+  [key: string]: SwaggerPropertieField
+}
+
+export interface SwaggerPropertieField {
+  type?: string;
+  description?: string;
+  title?: string;
+  items?: { [key: string]: string };
+  allOf?: { [key: string]: string }[];
+}
+
+export interface SwaggerPath {
+  [key: string]: SwaggerPathMethod
 }
 
 export interface Response {
@@ -47,12 +52,27 @@ export interface Response {
   }
 }
 
-export interface Parameters {
-  type?: string;
+export interface SwaggerParameters {
+  type: string;
   name: string;
   required: boolean;
   in: 'header' | 'body' | 'query' | 'param';
   schema?: Schema;
+  description?: string
+}
+
+export interface Modules {
+  name: string,
+  type: string,
+  description: string,
+  required: boolean,
+  ref?: string
+}
+
+export interface Schemas {
+  name: string;
+  type: string;
+  fields: Modules[];
 }
 
 export interface Schema {
@@ -65,36 +85,56 @@ export interface Info {
   title: string;
 }
 
-export function getRefName(ref?: string | undefined | null): string | null | undefined {
-  if (!ref) {
-    return null;
+export function getRefName(ref: string = ''): string {
+  const name = ref.split('/').pop();
+  if (name) {
+    return name;
   }
-  return ref.split('/').pop();
+  return ref;
 }
 
-export interface Module {
+// export interface Module {
+//   type: string;
+//   default?: any;
+//   description: string;
+//   required: boolean;
+//   properties: SwaggerPropertie;
+// }
+
+interface Module {
   type: string;
-  default?: any;
   description: string;
-  required: boolean;
-  properties: Propertie;
+  name: string;
+  fileds?: Module[] | null;
+  require?: boolean;
 }
 
-export function getModuleSchemaRefToObject(name: string | null | undefined, modules: Definition) {
-  if (!name) {
+export function getModuleSchemaRefToObject(name: string, modules: SwaggerDefinition = {}, title: string = '', require: boolean = false): Module[] | null {
+  if (name === '') {
     return null;
   }
-  const { type, properties, required } = modules[name];
-
-  const _moduleKeys = Object.keys(properties).map((item) => {
-    const keyValue = properties[item];
-    /** model地址连接 **/
-    const $ref = keyValue.items ? keyValue.items.$ref : keyValue.allOf && keyValue.allOf[0] ? keyValue.allOf[0].$ref : null;
-    return {
-      type: keyValue.type,
-      description: keyValue.description ? keyValue.description : keyValue.allOf && keyValue.allOf[1] ? keyValue.allOf[1].$ref : '',
-      required: required.indexOf(item) >= 0 ? true : false,
-      properties: getModuleSchemaRefToObject(getRefName($ref), modules)
+  const { type, properties = {}, required } = modules[name];
+  const fileds: Module[] = Object.keys(properties).map((item) => {
+    const { type = '', description, items, title, allOf } = properties[item];
+    const ref = items && items.$ref ? items.$ref : allOf && allOf[0] && allOf[0].$ref ? allOf[0].$ref : null;
+    const _description = allOf && allOf[1] && allOf[1].description || description || '';
+    const _type = allOf ? 'Object' : type;
+    const fileds: Module = {
+      name: item,
+      description: _description,
+      type: _type,
+      require: required.indexOf(item) >= 0 ? true : false
     }
+    if (!!ref) {
+      fileds.fileds = getModuleSchemaRefToObject(getRefName(ref), modules, _description);
+    }
+    return fileds;
   });
+  return [{
+    name,
+    type,
+    description: title,
+    fileds,
+    require
+  }]
 }

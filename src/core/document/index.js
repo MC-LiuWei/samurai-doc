@@ -39,19 +39,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var boss_1 = __importDefault(require("../Boss/boss"));
-var Context_1 = __importDefault(require("../Context"));
-function generateDoc(context) {
+function generateDoc(path, _modules) {
     return __awaiter(this, void 0, void 0, function () {
-        var paths, tasks;
+        var tasks;
         return __generator(this, function (_a) {
-            paths = context.Paths;
             tasks = [];
-            paths.forEach(function (item) {
+            path.forEach(function (item) {
                 tasks.push(new Promise(function (res) {
                     boss_1.default.queue({
                         message: item,
-                        info: Context_1.default.getInfo(),
-                        modules: Context_1.default.getModule(),
+                        modules: _modules,
                         callback: function (message) {
                             res(message);
                         }
