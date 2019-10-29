@@ -7,15 +7,17 @@ function getGeneratePath(path, methods, modules, version) {
     var methodKeys = Object.keys(methods);
     return methodKeys.map(function (method) {
         var methodValue = methods[method];
-        var description = methodValue.summary || path + "-" + method, params = getGenerateParams(methodValue.parameters, modules);
-        return {
+        var description = methodValue.summary || path + "-" + method, params = getGenerateParams(methodValue.parameters, modules), response = getGenerateSuccess(methodValue.responses, modules);
+        var data = {
             path: path,
             method: method,
             description: description,
             params: params,
             version: version,
+            response: response,
             tags: methodValue.tags ? methodValue.tags.join('/') : 'default'
         };
+        return data;
     });
 }
 exports.getGeneratePath = getGeneratePath;
@@ -36,6 +38,18 @@ function getGenerateParams(params, modules) {
     });
 }
 exports.getGenerateParams = getGenerateParams;
+function getGenerateSuccess(data, modules) {
+    var resKey = Object.keys(data);
+    return resKey.map(function (item) {
+        var _a = data[item], description = _a.description, schema = _a.schema;
+        return {
+            name: item,
+            description: description || "" + item,
+            ref: schema && schema.$ref && schema.$ref || ""
+        };
+    });
+}
+exports.getGenerateSuccess = getGenerateSuccess;
 function getGenerateModule(ref, modules) {
     if (modules === void 0) { modules = {}; }
 }

@@ -12,7 +12,7 @@ export interface SwaggerPaths {
 export interface SwaggerPathMethod {
     summary: string;
     parameters: SwaggerParameters[];
-    responses: Response;
+    responses: SwaggerResponse;
     tags: string[];
 }
 export interface SwaggerDefinition {
@@ -40,7 +40,7 @@ export interface SwaggerPropertieField {
 export interface SwaggerPath {
     [key: string]: SwaggerPathMethod;
 }
-export interface Response {
+export interface SwaggerResponse {
     [key: string]: {
         description: string;
         schema?: Schema;

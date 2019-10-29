@@ -1,20 +1,23 @@
-import { SwaggerDefinition, SwaggerPath, SwaggerParameters } from "./swagger";
+import { SwaggerDefinition, SwaggerPath, SwaggerParameters, SwaggerResponse } from "./swagger";
 
 
-export function getGeneratePath(path: string = "", methods: SwaggerPath = {}, modules: SwaggerDefinition = {}, version: string) {
+export function getGeneratePath(path: string = "", methods: SwaggerPath = {}, modules: SwaggerDefinition = {}, version: string): Paths[] {
   const methodKeys = Object.keys(methods);
   return methodKeys.map((method) => {
     const methodValue = methods[method];
     let description = methodValue.summary || `${path}-${method}`,
-      params = getGenerateParams(methodValue.parameters, modules);
-    return {
+      params = getGenerateParams(methodValue.parameters, modules),
+      response = getGenerateSuccess(methodValue.responses, modules);
+    const data: Paths = {
       path,
       method,
       description,
       params,
       version,
+      response,
       tags: methodValue.tags ? methodValue.tags!.join('/') : 'default'
     }
+    return data;
   });
 }
 
@@ -24,8 +27,14 @@ export interface Paths {
   version: string;
   method: string;
   description: string;
+  response: ResponseArr[];
   params: Params[]
 }
+
+export interface ResponseArr {
+  name: string, description: string; ref?: string | null
+}
+
 export interface Params {
   type?: string;
   name: string;
@@ -48,6 +57,18 @@ export function getGenerateParams(params: SwaggerParameters[] = [], modules: Swa
       _param.ref = item.schema.$ref
     }
     return _param;
+  })
+}
+
+export function getGenerateSuccess(data: SwaggerResponse, modules: SwaggerDefinition) {
+  const resKey = Object.keys(data);
+  return resKey.map((item) => {
+    const { description, schema } = data[item];
+    return {
+      name: item,
+      description: description || `${item}`,
+      ref: schema && schema.$ref && schema.$ref || ""
+    }
   })
 }
 
