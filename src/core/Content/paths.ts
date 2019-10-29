@@ -32,7 +32,7 @@ export interface Paths {
 }
 
 export interface ResponseArr {
-  name: string, description: string; ref?: string | null
+  name: string, description: string; ref?: string | null; type: string | null;
 }
 
 export interface Params {
@@ -67,6 +67,7 @@ export function getGenerateSuccess(data: SwaggerResponse, modules: SwaggerDefini
     return {
       name: item,
       description: description || `${item}`,
+      type: schema && schema.type && schema.type || null,
       ref: schema && schema.$ref && schema.$ref || ""
     }
   })

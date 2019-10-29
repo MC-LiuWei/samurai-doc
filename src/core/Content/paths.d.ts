@@ -13,6 +13,7 @@ export interface ResponseArr {
     name: string;
     description: string;
     ref?: string | null;
+    type: string | null;
 }
 export interface Params {
     type?: string;
@@ -26,6 +27,7 @@ export declare function getGenerateParams(params: SwaggerParameters[] | undefine
 export declare function getGenerateSuccess(data: SwaggerResponse, modules: SwaggerDefinition): {
     name: string;
     description: string;
+    type: string | null;
     ref: string;
 }[];
 export declare function getGenerateModule(ref: string, modules?: SwaggerDefinition): void;

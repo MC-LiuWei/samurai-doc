@@ -42,7 +42,7 @@ function getApiSuccess(res, modules) {
             var _module = modules.find(function (item) { return item.name === refname_3; });
             return "  * @apiSuccess {" + _module.type + "} data " + item.description + "\n" + getModules("@apiSuccess ", 'data', _module, modules);
         }
-        return "  * apiSuccess {Object} data " + item.description + "\n";
+        return "  * @apiSuccess {" + (item.type ? item.type : 'null') + "} data " + item.description + "\n";
     }).join('');
 }
 function parseDocObject(task) {

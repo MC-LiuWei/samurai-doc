@@ -45,6 +45,7 @@ function getGenerateSuccess(data, modules) {
         return {
             name: item,
             description: description || "" + item,
+            type: schema && schema.type && schema.type || null,
             ref: schema && schema.$ref && schema.$ref || ""
         };
     });

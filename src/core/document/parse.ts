@@ -48,7 +48,7 @@ function getApiSuccess(res: ResponseArr[], modules: Schemas[]): string {
       const _module: any = modules.find((item) => item.name === refname);
       return `  * @apiSuccess {${_module.type}} data ${item.description}\n${getModules(`@apiSuccess `, 'data', _module, modules)}`
     }
-    return `  * apiSuccess {Object} data ${item.description}\n`
+    return `  * @apiSuccess {${item.type ? item.type : 'null'}} data ${item.description}\n`
   }).join('');
 }
 
