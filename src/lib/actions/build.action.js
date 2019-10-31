@@ -151,7 +151,6 @@ function Generate(config) {
                                 }
                                 paths = new Content_1.default(doc);
                                 modules = paths.getModule();
-                                fs.writeFileSync(path.join(process.cwd(), name + ".json"), JSON.stringify({ modules: modules }, null, 2), { encoding: 'utf8' });
                                 return [4 /*yield*/, document_1.generateDoc(paths.getPath(), modules)];
                             case 1:
                                 docCode = _a.sent();
@@ -178,13 +177,6 @@ function Generate(config) {
         });
     });
 }
-function docToApiDoc(config) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/];
-        });
-    });
-}
 function getDoc(url) {
     return __awaiter(this, void 0, void 0, function () {
         var res, json, config;
@@ -203,7 +195,6 @@ function getDoc(url) {
                         console.info('文档读取失败');
                         process.exit(1);
                     }
-                    fs.writeFileSync(path.join(process.cwd(), "test.json"), JSON.stringify(config.swaggerDoc, null, 2), { encoding: 'utf8' });
                     return [2 /*return*/, config.swaggerDoc];
             }
         });

@@ -78,7 +78,6 @@ async function Generate(config: Configs) {
         }
         const paths = new Context(doc);
         const modules = paths.getModule();
-        fs.writeFileSync(path.join(process.cwd(), `${name}.json`), JSON.stringify({ modules: modules }, null, 2), { encoding: 'utf8' });
         const docCode = await generateDoc(paths.getPath(), modules);
         fs.writeFileSync(path.join(docOutputPath, 'apidoc.js'), docCode.join(''), { encoding: 'utf8' });
         execSync(`apidoc -i ./dist/${name} -o apidoc/${name}`);
@@ -99,10 +98,6 @@ async function Generate(config: Configs) {
     });
 }
 
-async function docToApiDoc(config: Configs) {
-
-}
-
 
 async function getDoc(url: string) {
   const res = await axios.get(`${url}/api-doc/swagger-ui-init.js`);
@@ -118,6 +113,5 @@ async function getDoc(url: string) {
     console.info('文档读取失败')
     process.exit(1);
   }
-  fs.writeFileSync(path.join(process.cwd(), `test.json`), JSON.stringify(config.swaggerDoc, null, 2), { encoding: 'utf8' });
   return config.swaggerDoc
 }
