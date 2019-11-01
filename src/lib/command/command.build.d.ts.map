@@ -1,1 +1,1 @@
-{"version":3,"file":"command.build.d.ts","sourceRoot":"","sources":["command.build.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,oBAAoB,CAAC;AACrD,OAAO,EAAE,eAAe,EAAW,MAAM,WAAW,CAAC;AAGrD,qBAAa,YAAa,SAAQ,eAAe;IACxC,IAAI,CAAC,OAAO,EAAE,eAAe;CAcrC"}
+{"version":3,"file":"command.build.d.ts","sourceRoot":"","sources":["command.build.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,oBAAoB,CAAC;AAErD,OAAO,EAAE,eAAe,EAAW,MAAM,WAAW,CAAC;AAGrD,qBAAa,YAAa,SAAQ,eAAe;IACxC,IAAI,CAAC,OAAO,EAAE,eAAe;CAerC"}

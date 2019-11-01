@@ -1,0 +1,10 @@
+{
+    "configs": [{
+        "url": "http://localhost:3000",
+        "name": "example",
+        "version": "1.0.0",
+        "description": "apiDoc basic example",
+        "title": "Custom apiDoc browser title"
+    }],
+    "output": "./dist"
+}

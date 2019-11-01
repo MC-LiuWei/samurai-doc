@@ -51,38 +51,45 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var abstract_command_1 = require("./abstract.command");
+var abstract_action_1 = require("./abstract.action");
+var fs_1 = require("fs");
+var path_1 = require("path");
 var chalk_1 = __importDefault(require("chalk"));
-var BuildCommand = /** @class */ (function (_super) {
-    __extends(BuildCommand, _super);
-    function BuildCommand() {
+var copy_1 = require("../../utils/copy");
+var child_process_1 = require("child_process");
+var CreateAction = /** @class */ (function (_super) {
+    __extends(CreateAction, _super);
+    function CreateAction() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    BuildCommand.prototype.load = function (program) {
-        var _this = this;
-        program
-            .command('build')
-            .option('-c, --config [path]', 'build config')
-            .description('build description')
-            .action(function (command) { return __awaiter(_this, void 0, void 0, function () {
-            var options;
+    CreateAction.prototype.handle = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var projectName, projectPath, git, install;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        options = [];
-                        if (!command.config) {
-                            console.log(chalk_1.default.bgRedBright("输入配置文件路径"));
-                            process.exit(0);
-                        }
-                        options.push({ name: 'config', value: command.config });
-                        return [4 /*yield*/, this.action.handle(options)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
+                projectName = params.find(function (item) { return item.name === "name"; }).value;
+                projectPath = path_1.join(process.cwd(), String(projectName));
+                git = params.find(function (item) { return item.name === 'git'; });
+                install = params.find(function (item) { return item.name === 'install'; });
+                if (fs_1.existsSync(projectPath)) {
+                    console.log(chalk_1.default.bgRedBright("目录已存在"));
+                    process.exit(0);
                 }
+                console.log(chalk_1.default.bgGreen("创建文档文件夹"));
+                fs_1.mkdirSync(projectPath);
+                console.log(chalk_1.default.bgGreen("拷贝模版文件"));
+                copy_1.copy(path_1.join(__dirname, '..', '..', 'example'), projectPath);
+                if (git && git.value) {
+                    process.chdir(projectPath);
+                    console.log(chalk_1.default.bgGreen("初始化git仓库"));
+                    child_process_1.exec("git init");
+                    child_process_1.exec("git remote add origin " + git.value);
+                    console.log(chalk_1.default.bgGreen("结束"));
+                    process.exit(0);
+                }
+                return [2 /*return*/];
             });
-        }); });
+        });
     };
-    return BuildCommand;
-}(abstract_command_1.AbstractCommand));
-exports.BuildCommand = BuildCommand;
+    return CreateAction;
+}(abstract_action_1.AbstractAction));
+exports.CreateAction = CreateAction;

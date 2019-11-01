@@ -47,8 +47,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+var chalk_1 = __importDefault(require("chalk"));
 var abstract_command_1 = require("./abstract.command");
+var inquirer_1 = require("inquirer");
 var CreateCommand = /** @class */ (function (_super) {
     __extends(CreateCommand, _super);
     function CreateCommand() {
@@ -57,21 +62,45 @@ var CreateCommand = /** @class */ (function (_super) {
     CreateCommand.prototype.load = function (program) {
         var _this = this;
         program
-            .command('new')
-            .option('-c, --config [path]', 'build config')
-            .description('build description')
-            .action(function (command) { return __awaiter(_this, void 0, void 0, function () {
-            var options;
+            .command('new [name]')
+            .alias('n')
+            .description('create project')
+            .option('-g, --skipGit', 'skip git init')
+            .option('-i, --skipInit', 'skip npm init')
+            .action(function (command, args) { return __awaiter(_this, void 0, void 0, function () {
+            var options, repository;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         options = [];
-                        if (!command.config) {
-                            return [2 /*return*/];
+                        if (!command || (typeof command !== 'string')) {
+                            console.log(chalk_1.default.bgRedBright("请输入文档项目名"));
+                            process.exit(1);
                         }
-                        options.push({ name: 'config', value: command.config });
-                        return [4 /*yield*/, this.action.handle(options)];
+                        options.push({
+                            name: 'name',
+                            value: command
+                        });
+                        if (!!args.skipGit) return [3 /*break*/, 2];
+                        return [4 /*yield*/, inquirer_1.prompt([{
+                                    type: 'input',
+                                    name: 'repository',
+                                    message: "请输入git仓库地址",
+                                }])];
                     case 1:
+                        repository = (_a.sent()).repository;
+                        if (repository == '') {
+                            console.log(chalk_1.default.bgYellow("请输入git仓库地址"));
+                            process.exit(1);
+                        }
+                        (!!repository) && options.push({ name: "git", value: repository });
+                        _a.label = 2;
+                    case 2:
+                        if (!args.skipInit) {
+                            options.push({ name: "install", value: !args.skipInit });
+                        }
+                        return [4 /*yield*/, this.action.handle(options)];
+                    case 3:
                         _a.sent();
                         return [2 /*return*/];
                 }
