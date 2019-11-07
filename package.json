@@ -1,6 +1,6 @@
 {
     "name": "samurai-doc",
-    "version": "1.0.3",
+    "version": "1.0.7",
     "bin": {
         "samurai": "bin/samurai.js"
     },

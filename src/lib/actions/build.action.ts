@@ -32,13 +32,13 @@ export class BuildAction extends AbstractAction {
     }
     const _configPath = path.join(process.cwd(), strConfigPath);
     const config: Configs = JSON.parse(fs.readFileSync(_configPath, { encoding: 'utf-8' }));
-    spinner.update(chalk.cyanBright('  >>>>  文档加载中'));
-    spinner.start();
     await Generate(config);
   }
 }
 
 async function Generate(config: Configs) {
+  spinner.update(chalk.cyanBright('  >>>>  文档加载中'));
+  spinner.start();
   const docConfigs: ConfigInterface[] = config.configs;
   const outputPath: string = path.join(process.cwd(), config.output);
   const apiDocPath: string = path.join(process.cwd(), 'apidoc');
@@ -54,9 +54,11 @@ async function Generate(config: Configs) {
 
   docTaskQueue = docConfigs.map<Promise<{ name: string; doc: any }>>((item) => {
     return new Promise<{ name: string; doc: any }>(async (res, rej) => {
+      console.log(chalk.cyanBright(`  >>>>  开始加载${item.name}`));
       const doc = await getDoc(item.url);
-
-      fs.writeFileSync(path.join(process.cwd(), `${item.name}.json`), JSON.stringify(doc, null, 2), { encoding: 'utf8' });
+      if (!doc) {
+        console.log(chalk.redBright(`  >>>>  ${item.name}文档加载失败`));
+      }
       res({
         name: item.name,
         doc,
@@ -66,7 +68,13 @@ async function Generate(config: Configs) {
 
   Promise.all<{ name: string; doc: any }>(docTaskQueue)
     .then((res) => {
-      res.forEach(async (_doc, index) => {
+      const docqueue = res.filter((item) => !!item.doc);
+      if (docqueue.length <= 0) {
+        spinner.stop();
+        spinner.update(chalk.redBright(`  >>>>  文档加载失败,待处理文档列表为空`));
+        process.exit(0);
+      }
+      docqueue.forEach(async (_doc, index) => {
         const { doc, name } = _doc
         const docOutputPath = path.join(outputPath, name);
         const docApiDocPath = path.join(apiDocPath, name);
@@ -91,6 +99,7 @@ async function Generate(config: Configs) {
           url: "http://www.apidoc-admin.com/",
         }, null, 2), { encoding: 'utf8' });
         if (index === 0) {
+          spinner.update(chalk.cyanBright('  >>>>  文档加载完成'));
           spinner.stop();
           process.exit(0);
         }
@@ -100,7 +109,23 @@ async function Generate(config: Configs) {
 
 
 async function getDoc(url: string) {
-  const res = await axios.get(`${url}/api-doc/swagger-ui-init.js`);
+  const res: any = await axios.get(`${url}/api-doc/swagger-ui-init.js`).then((res) => {
+    return res
+  }, (err) => {
+    if (err) {
+      return '请求异常，请检查网络'
+    }
+    return null;
+  }).catch((error) => {
+    if (error) {
+      console.log(chalk.redBright(error))
+    }
+  }).finally(() => {
+    return '请求完毕';
+  });
+  if (res === '请求异常，请检查网络') {
+    return null;
+  }
   const json = res.data.match(
     /var options = ({\s+"swaggerDoc"[\s\S]+});\s+url = options.swaggerUrl/m
   );
