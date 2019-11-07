@@ -68,6 +68,7 @@ var abstract_action_1 = require("./abstract.action");
 var Content_1 = __importDefault(require("../../core/Content"));
 var getFilenameSuffix_1 = require("../../utils/getFilenameSuffix");
 var document_1 = require("../../core/document");
+var del_1 = require("../../utils/del");
 var spinner = io_spin_1.default('  >>>>>>  加载中', "Box1");
 var BuildAction = /** @class */ (function (_super) {
     __extends(BuildAction, _super);
@@ -109,10 +110,12 @@ function Generate(config) {
             outputPath = path.join(process.cwd(), config.output);
             apiDocPath = path.join(process.cwd(), 'apidoc');
             docTaskQueue = [];
-            if (!fs.existsSync(outputPath)) {
+            if (fs.existsSync(outputPath)) {
+                del_1.del(outputPath);
                 fs.mkdirSync(outputPath);
             }
-            if (!fs.existsSync(apiDocPath)) {
+            if (fs.existsSync(apiDocPath)) {
+                del_1.del(apiDocPath);
                 fs.mkdirSync(apiDocPath);
             }
             docTaskQueue = docConfigs.map(function (item) {

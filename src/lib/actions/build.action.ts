@@ -9,6 +9,7 @@ import { Input } from "../command/command.input";
 import Context from '../../core/Content';
 import { getFilenameSuffix } from '../../utils/getFilenameSuffix';
 import { generateDoc } from '../../core/document';
+import { del } from '../../utils/del';
 const spinner = spin('  >>>>>>  加载中', "Box1");
 export interface ConfigInterface {
   name: string;
@@ -45,10 +46,12 @@ async function Generate(config: Configs) {
 
   let docTaskQueue: Promise<{ name: string; doc: any }>[] = [];
 
-  if (!fs.existsSync(outputPath)) {
+  if (fs.existsSync(outputPath)) {
+    del(outputPath);
     fs.mkdirSync(outputPath);
   }
-  if (!fs.existsSync(apiDocPath)) {
+  if (fs.existsSync(apiDocPath)) {
+    del(apiDocPath);
     fs.mkdirSync(apiDocPath);
   }
 
