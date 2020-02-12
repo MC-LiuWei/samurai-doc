@@ -1,0 +1,1 @@
+{"version":3,"file":"abstract.command.d.ts","sourceRoot":"","sources":["abstract.command.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,MAAM,4BAA4B,CAAC;AAC5D,OAAO,EAAE,eAAe,EAAE,MAAM,WAAW,CAAC;AAE5C,8BAAsB,eAAe;IAEjC,SAAS,CAAC,MAAM,EAAE,cAAc;gBAAtB,MAAM,EAAE,cAAc;aAGlB,IAAI,CAAC,OAAO,EAAE,eAAe,GAAG,IAAI;CACrD"}
