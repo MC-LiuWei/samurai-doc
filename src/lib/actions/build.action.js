@@ -62,9 +62,13 @@ var path = __importStar(require("path"));
 var fs = __importStar(require("fs"));
 var io_spin_1 = __importDefault(require("io-spin"));
 var chalk_1 = __importDefault(require("chalk"));
+var child_process_1 = require("child_process");
 var axios_1 = __importDefault(require("axios"));
 var abstract_action_1 = require("./abstract.action");
+var Content_1 = __importDefault(require("../../core/Content"));
 var getFilenameSuffix_1 = require("../../utils/getFilenameSuffix");
+var document_1 = require("../../core/document");
+var del_1 = require("../../utils/del");
 var spinner = io_spin_1.default('  >>>>>>  加载中', "Box1");
 var BuildAction = /** @class */ (function (_super) {
     __extends(BuildAction, _super);
@@ -84,8 +88,6 @@ var BuildAction = /** @class */ (function (_super) {
                         }
                         _configPath = path.join(process.cwd(), strConfigPath);
                         config = JSON.parse(fs.readFileSync(_configPath, { encoding: 'utf-8' }));
-                        spinner.update(chalk_1.default.cyanBright('  >>>>  文档加载中'));
-                        spinner.start();
                         return [4 /*yield*/, Generate(config)];
                     case 1:
                         _a.sent();
@@ -102,14 +104,18 @@ function Generate(config) {
         var docConfigs, outputPath, apiDocPath, docTaskQueue;
         var _this = this;
         return __generator(this, function (_a) {
+            spinner.update(chalk_1.default.cyanBright('  >>>>  文档加载中'));
+            spinner.start();
             docConfigs = config.configs;
             outputPath = path.join(process.cwd(), config.output);
             apiDocPath = path.join(process.cwd(), 'apidoc');
             docTaskQueue = [];
-            if (!fs.existsSync(outputPath)) {
+            if (fs.existsSync(outputPath)) {
+                del_1.del(outputPath);
                 fs.mkdirSync(outputPath);
             }
-            if (!fs.existsSync(apiDocPath)) {
+            if (fs.existsSync(apiDocPath)) {
+                del_1.del(apiDocPath);
                 fs.mkdirSync(apiDocPath);
             }
             docTaskQueue = docConfigs.map(function (item) {
@@ -117,12 +123,14 @@ function Generate(config) {
                     var doc;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
-                            case 0: return [4 /*yield*/, getDoc(item.url)];
+                            case 0:
+                                console.log(chalk_1.default.cyanBright("  >>>>  \u5F00\u59CB\u52A0\u8F7D" + item.name));
+                                return [4 /*yield*/, getDoc(item.url)];
                             case 1:
                                 doc = _a.sent();
-                                console.log(doc);
-                                // const content = new Content(doc);
-                                fs.writeFileSync(path.join(process.cwd(), item.name + ".json"), JSON.stringify(doc, null, 2), { encoding: 'utf8' });
+                                if (!doc) {
+                                    console.log(chalk_1.default.redBright("  >>>>  " + item.name + "\u6587\u6863\u52A0\u8F7D\u5931\u8D25"));
+                                }
                                 res({
                                     name: item.name,
                                     doc: doc,
@@ -132,13 +140,53 @@ function Generate(config) {
                     });
                 }); });
             });
-            return [2 /*return*/];
-        });
-    });
-}
-function docToApiDoc(config) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
+            Promise.all(docTaskQueue)
+                .then(function (res) {
+                var docqueue = res.filter(function (item) { return !!item.doc; });
+                if (docqueue.length <= 0) {
+                    spinner.stop();
+                    spinner.update(chalk_1.default.redBright("  >>>>  \u6587\u6863\u52A0\u8F7D\u5931\u8D25,\u5F85\u5904\u7406\u6587\u6863\u5217\u8868\u4E3A\u7A7A"));
+                    process.exit(0);
+                }
+                docqueue.forEach(function (_doc, index) { return __awaiter(_this, void 0, void 0, function () {
+                    var doc, name, docOutputPath, docApiDocPath, paths, modules, docCode, docBiscConfig;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                doc = _doc.doc, name = _doc.name;
+                                docOutputPath = path.join(outputPath, name);
+                                docApiDocPath = path.join(apiDocPath, name);
+                                if (!fs.existsSync(path.join(docOutputPath))) {
+                                    fs.mkdirSync(docOutputPath);
+                                }
+                                if (!fs.existsSync(path.join(docApiDocPath))) {
+                                    fs.mkdirSync(docApiDocPath);
+                                }
+                                paths = new Content_1.default(doc);
+                                modules = paths.getModule();
+                                return [4 /*yield*/, document_1.generateDoc(paths.getPath(), modules)];
+                            case 1:
+                                docCode = _a.sent();
+                                fs.writeFileSync(path.join(docOutputPath, 'apidoc.js'), docCode.join(''), { encoding: 'utf8' });
+                                child_process_1.execSync("apidoc -i ./dist/" + name + " -o apidoc/" + name);
+                                docBiscConfig = config.configs.find(function (item) { return item.name === name; });
+                                fs.writeFileSync(path.join(docApiDocPath, 'apidoc.json'), JSON.stringify({
+                                    name: name,
+                                    version: doc.info.version + ".1" || docBiscConfig.version,
+                                    description: docBiscConfig.description || name,
+                                    title: docBiscConfig.title || name,
+                                    url: "http://www.apidoc-admin.com/",
+                                }, null, 2), { encoding: 'utf8' });
+                                if (index === 0) {
+                                    spinner.update(chalk_1.default.cyanBright('  >>>>  文档加载完成'));
+                                    spinner.stop();
+                                    process.exit(0);
+                                }
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+            });
             return [2 /*return*/];
         });
     });
@@ -148,9 +196,25 @@ function getDoc(url) {
         var res, json, config;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, axios_1.default.get(url + "/api-doc/swagger-ui-init.js")];
+                case 0: return [4 /*yield*/, axios_1.default.get(url + "/api-doc/swagger-ui-init.js").then(function (res) {
+                        return res;
+                    }, function (err) {
+                        if (err) {
+                            return '请求异常，请检查网络';
+                        }
+                        return null;
+                    }).catch(function (error) {
+                        if (error) {
+                            console.log(chalk_1.default.redBright(error));
+                        }
+                    }).finally(function () {
+                        return '请求完毕';
+                    })];
                 case 1:
                     res = _a.sent();
+                    if (res === '请求异常，请检查网络') {
+                        return [2 /*return*/, null];
+                    }
                     json = res.data.match(/var options = ({\s+"swaggerDoc"[\s\S]+});\s+url = options.swaggerUrl/m);
                     if (!json || !json[1]) {
                         console.log('文档解析失败');

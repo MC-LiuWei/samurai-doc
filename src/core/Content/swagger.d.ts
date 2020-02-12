@@ -1,51 +1,87 @@
 export interface Swagger {
     info: Info;
-    Modules: Module[];
-    Paths: Path[];
+    basePath: string;
+    tags: string[];
+    schemes: string[];
+    paths: SwaggerPaths;
+    definitions: SwaggerDefinition;
 }
-export interface Module {
+export interface SwaggerPaths {
+    [key: string]: SwaggerPath;
+}
+export interface SwaggerPathMethod {
+    summary: string;
+    parameters: SwaggerParameters[];
+    responses: SwaggerResponse;
+    tags: string[];
+}
+export interface SwaggerDefinition {
+    [key: string]: SwaggerModule;
+}
+export interface SwaggerModule {
     type: string;
-    name: string;
-    schema: {
-        [key: string]: Schema;
+    properties: SwaggerPropertie;
+    required: string[];
+}
+export interface SwaggerPropertie {
+    [key: string]: SwaggerPropertieField;
+}
+export interface SwaggerPropertieField {
+    type?: string;
+    description?: string;
+    title?: string;
+    items?: {
+        [key: string]: string;
+    };
+    allOf?: {
+        [key: string]: string;
+    }[];
+}
+export interface SwaggerPath {
+    [key: string]: SwaggerPathMethod;
+}
+export interface SwaggerResponse {
+    [key: string]: {
+        description: string;
+        schema?: Schema;
     };
 }
-export interface Path {
-    title: string;
-    method: string;
-    path: string;
-    tags: string;
-    params: Param[];
-    responses: Response[];
-}
-export interface Param {
-    name: string;
+export interface SwaggerParameters {
     type: string;
+    name: string;
     required: boolean;
-    in: string;
-    ref?: string;
-    children?: Module | null | undefined;
+    in: 'header' | 'body' | 'query' | 'param';
+    schema?: Schema;
+    description?: string;
 }
-export interface Response {
-    status: string;
-    schema: {
-        type?: string;
-        ref?: string;
-    };
+export interface Modules {
+    name: string;
+    type: string;
+    description: string;
+    required: boolean;
+    ref?: string;
+}
+export interface Schemas {
+    name: string;
+    type: string;
+    fields: Modules[];
 }
 export interface Schema {
-    type: string;
-    name: string;
-    required: boolean;
-    description: string;
-    ref?: string;
-    children?: Module | null | undefined;
+    [key: string]: string;
 }
 export interface Info {
     description: string;
     version: string;
     title: string;
 }
-export declare function getRefName(ref?: string): string | null | undefined;
-export declare function getModuleSchemaRefToObject(name: string | null | undefined, modules: Module[]): Module | null | undefined;
+export declare function getRefName(ref?: string): string;
+interface Module {
+    type: string;
+    description: string;
+    name: string;
+    fileds?: Module[] | null;
+    require?: boolean;
+}
+export declare function getModuleSchemaRefToObject(name: string, modules?: SwaggerDefinition, title?: string, require?: boolean): Module[] | null;
+export {};
 //# sourceMappingURL=swagger.d.ts.map

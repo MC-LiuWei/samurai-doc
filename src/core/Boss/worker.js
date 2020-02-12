@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var docDataLoader_1 = require("../generateDoc/docDataLoader");
+var parse_1 = require("../document/parse");
 process.on('message', function (task) {
-    var doc = docDataLoader_1.parseDocObject(task);
-    process.send(doc);
+    var doc = parse_1.parseDocObject(task);
+    process && process.send && process.send(doc);
 });

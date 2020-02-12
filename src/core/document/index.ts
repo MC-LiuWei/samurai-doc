@@ -1,16 +1,14 @@
-import { ContextObj } from '../Context/interface';
 import boss from '../Boss/boss';
-import Context from '../Context';
+import { Paths } from '../Content/paths';
+import { Schemas } from '../Content/swagger';
 
-export async function generateDoc(context: ContextObj) {
-  const paths = context.Paths;
+export async function generateDoc(path: Paths[], _modules: Schemas[]) {
   const tasks: Array<Promise<void>> = [];
-  paths.forEach((item) => {
+  path.forEach((item) => {
     tasks.push(new Promise((res) => {
       boss.queue({
         message: item,
-        info: Context.getInfo(),
-        modules: Context.getModule(),
+        modules: _modules,
         callback: (message: any) => {
           res(message);
         }
